@@ -1,0 +1,55 @@
+services:
+  backend:
+    build: ./backend
+
+    ports:
+      - "5000:5000"
+      - "51212:51212"
+
+    volumes:
+    - ./backend/prisma:/app/prisma
+    
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /app/src
+
+        - action: rebuild
+          path: ./backend/package.json
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+
+        - action: sync
+          path: ./frontend/public
+          target: /app/public
+
+        - action: rebuild
+          path: ./frontend/package.json
+
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: trackweb
+      POSTGRES_PASSWORD: 7709
+      POSTGRES_DB: trackweb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+
+volumes:
+  postgres_data:
